@@ -14,7 +14,7 @@ def receiveMessages(serverSocket):
         tagName = "name"+str(randNum)
         textBox.insert(END, "\n" + message,tagName)
         lineCount = str(int(textBox.index('end').split('.')[0])-1)
-        print("Index = ", index, " lineCOunt = ", lineCount,"rand = ",randNum)
+        #print("Index = ", index, " lineCOunt = ", lineCount,"rand = ",randNum)
         textBox.tag_add("name1",lineCount+".0",lineCount+"."+str(index))
         textBox.tag_config("name1", foreground='red')
         textBox.tag_add("name2", lineCount + ".0", lineCount + "." + str(index))
@@ -25,7 +25,9 @@ def receiveMessages(serverSocket):
 
 def sendMessage():
     #print("Inside send message"+message.get())
-    socketObj.send(message.get().encode("UTF-8"))
+    message = messageBox.get("1.0","end-1c")
+    socketObj.send(message.encode("UTF-8"))
+    messageBox.delete("1.0",END)
 
 socketObj = socket.socket()
 port = 10345
@@ -37,15 +39,15 @@ threading.Thread(target=receiveMessages, args=(socketObj,)).start()
 
 mainWindow = Tk()
 mainWindow.title("Chat")
-textBox = Text(mainWindow, height=30, width=50,fg='blue')
+textBox = Text(mainWindow, height=20, width=50,fg='blue',font=('Comic Sans MS',12))
 textBox.insert(END, 'Hello '+clientName)
 textBox.pack()
-
 #textBox.tag_configure('me',foreground='green')
 label = Label(mainWindow,text="Enter message").pack()
-message = StringVar()
-messageBox = Entry(mainWindow,textvariable=message).pack()
-button = Button(mainWindow,text="Send",command=sendMessage).pack()
+messageBox = Text(mainWindow,height=5,width=40)
+messageBox.pack()
+button = Button(mainWindow,width=8,height=1,text="Send",command=sendMessage,font=('Comic Sans MS',14,'bold'),relief=RAISED)
+button.pack(pady=15)
 mainWindow.mainloop()
 
 

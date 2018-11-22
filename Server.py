@@ -21,7 +21,10 @@ def handleClient(socket,clientName):
             print("Server got "+message)
             broadCast(clientName+":"+message)
         except ConnectionResetError:
+            clientSockets.remove(socket)
+            broadCast("--------------------"+clientName+" left the chat--------------")
             print(clientName,"closed connection")
+            break
 
 
 
