@@ -12,7 +12,9 @@ def receiveMessages(serverSocket):
                 index+=1
         randNum = random.randrange(1,3)
         tagName = "name"+str(randNum)
+        textBox.config(state=NORMAL)
         textBox.insert(END, "\n" + message,tagName)
+        textBox.config(state=DISABLED)
         lineCount = str(int(textBox.index('end').split('.')[0])-1)
         #print("Index = ", index, " lineCOunt = ", lineCount,"rand = ",randNum)
         textBox.tag_add("name1",lineCount+".0",lineCount+"."+str(index))
@@ -29,12 +31,23 @@ def sendMessage():
     socketObj.send(message.encode("UTF-8"))
     messageBox.delete("1.0",END)
 
-socketObj = socket.socket()
-port = 10345
-clientName = str(input("Choose a name for userself \n"))
-socketObj.connect(('127.0.0.1', port))
-socketObj.send(clientName.encode("UTF-8"))
-threading.Thread(target=receiveMessages, args=(socketObj,)).start()
+
+while True:
+    socketObj = socket.socket()
+    port = 10345
+    socketObj.connect(('127.0.0.1', port))
+    window = Tk()
+    clientName = str(input("Choose a name for userself \n"))
+    socketObj.send(clientName.encode("UTF-8"))
+    validations = str(socketObj.recv(1024).decode("UTF-8"))
+    print(validations)
+    if validations=="EverythingIsFine":
+        threading.Thread(target=receiveMessages, args=(socketObj,)).start()
+        break
+    else:
+        print("Username already used \n")
+        socketObj.close()
+
 
 
 mainWindow = Tk()
@@ -46,8 +59,14 @@ textBox.pack()
 label = Label(mainWindow,text="Enter message").pack()
 messageBox = Text(mainWindow,height=5,width=40)
 messageBox.pack()
-button = Button(mainWindow,width=8,height=1,text="Send",command=sendMessage,font=('Comic Sans MS',14,'bold'),relief=RAISED)
+button = Button(mainWindow,width=8,height=1,text="Send",command=sendMessage,font=('Comic Sans MS',14,'bold'),relief=RAISED,)
 button.pack(pady=15)
+'''varST = StringVar()
+message = Message(mainWindow,textvariable=varST).pack()
+varST.set("Hhh")
+varST.set(str(varST.get())+"hhjfljasajd;aj")'''
+mainWindow.attributes("-topmost", True)
+mainWindow.attributes("-topmost", False)
 mainWindow.mainloop()
 
 
