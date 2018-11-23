@@ -2,6 +2,7 @@ import socket,threading,random
 from tkinter import *
 socketObj = None
 clientName = None
+serverPassword = None
 def receiveMessages(serverSocket):
     while True:
         message = serverSocket.recv(1024).decode("UTF-8")
@@ -38,6 +39,8 @@ def printIP():
     global socketObj
     socketObj = socket.socket()
     port = 10345
+    global serverPassword
+    serverPassword = passwordFromGUI.get()
     try:
         socketObj.connect((ipAddrFromGUI.get(), port))
     except socket.gaierror:
@@ -47,12 +50,15 @@ def printIP():
         # clientName = str(input("Choose a name for userself \n"))
         global clientName
         clientName = usernameFromGUI.get()
-        socketObj.send(clientName.encode("UTF-8"))
+        socketObj.send(clientName.encode("UTF-8")+":".encode("UTF-8")+serverPassword.encode("UTF-8"))
         validations = str(socketObj.recv(1024).decode("UTF-8"))
         print(validations)
         if validations == "EverythingIsFine":
             threading.Thread(target=receiveMessages, args=(socketObj,)).start()
             window.destroy()
+        elif validations == "IncorrectPassword":
+            print("Incorrect Password \n")
+            socketObj.close()
         else:
             print("Username already used \n")
             socketObj.close()
@@ -63,6 +69,9 @@ window.title("Enter Server Details")
 labelIPAddr = Label(window, text="Enter Server IP").pack()
 ipAddrFromGUI = StringVar()
 entryBoxIPAddr = Entry(window,textvariable=ipAddrFromGUI).pack()
+labelServerPassword = Label(window, text="Enter Password").pack()
+passwordFromGUI = StringVar()
+entryBoxPassword = Entry(window,textvariable=passwordFromGUI).pack()
 labelUsername = Label(window, text="Choose a username").pack()
 usernameFromGUI = StringVar()
 entryBoxUsername = Entry(window, textvariable=usernameFromGUI).pack()
@@ -93,5 +102,6 @@ varST.set(str(varST.get())+"hhjfljasajd;aj")'''
 mainWindow.attributes("-topmost", True)
 mainWindow.attributes("-topmost", False)
 mainWindow.mainloop()
+
 
 
