@@ -48,7 +48,8 @@ def printIP():
     try:
         socketObj.connect((ipAddrFromGUI.get(), port))
     except socket.gaierror:
-        print("Invalid Server address or Server is not alive")
+        #print("Invalid Server address or Server is not alive")
+        messagebox.showerror("Error", "Invalid Server address or Server is not alive")
     else:
         print(ipAddrFromGUI.get(),usernameFromGUI.get())
         # clientName = str(input("Choose a name for userself \n"))
