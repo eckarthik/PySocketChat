@@ -1,8 +1,12 @@
 import socket,threading,random
 from tkinter import *
+from tkinter import messagebox
 socketObj = None
 clientName = None
 serverPassword = None
+connectionDetailsValidationFlag = 0
+#GUI
+
 def receiveMessages(serverSocket):
     while True:
         message = serverSocket.recv(1024).decode("UTF-8")
@@ -56,13 +60,15 @@ def printIP():
         if validations == "EverythingIsFine":
             threading.Thread(target=receiveMessages, args=(socketObj,)).start()
             window.destroy()
+            global connectionDetailsValidationFlag
+            connectionDetailsValidationFlag = 1
         elif validations == "IncorrectPassword":
             print("Incorrect Password \n")
+            messagebox.showerror("Error","Incorrect Password")
             socketObj.close()
-        else:
-            print("Username already used \n")
+        elif validations == "UsernameAlreadyUsed":
+            messagebox.showerror("Error", "Username already used")
             socketObj.close()
-
 window = Tk()
 window.geometry('300x200')
 window.title("Enter Server Details")
@@ -80,28 +86,27 @@ button = Button(window, width=8, height=1, text="Connect", command=printIP, font
 button.pack(pady=15)
 window.mainloop()
 
-
-
-
-
-mainWindow = Tk()
-mainWindow.title("Chat")
-textBox = Text(mainWindow, height=20, width=50,fg='blue',font=('Comic Sans MS',12))
-textBox.insert(END, 'Hello '+clientName)
-textBox.pack()
-#textBox.tag_configure('me',foreground='green')
-label = Label(mainWindow,text="Enter message").pack()
-messageBox = Text(mainWindow,height=5,width=40)
-messageBox.pack()
-button = Button(mainWindow,width=8,height=1,text="Send",command=sendMessage,font=('Comic Sans MS',14,'bold'),relief=RAISED,)
-button.pack(pady=15)
-'''varST = StringVar()
-message = Message(mainWindow,textvariable=varST).pack()
-varST.set("Hhh")
-varST.set(str(varST.get())+"hhjfljasajd;aj")'''
-mainWindow.attributes("-topmost", True)
-mainWindow.attributes("-topmost", False)
-mainWindow.mainloop()
-
+if connectionDetailsValidationFlag==1:
+    mainWindow = Tk()
+    mainWindow.title("Chat")
+    textBox = Text(mainWindow, height=20, width=50, fg='blue', font=('Comic Sans MS', 12))
+    textBox.insert(END, 'Hello ' + clientName)
+    textBox.pack()
+    # textBox.tag_configure('me',foreground='green')
+    label = Label(mainWindow, text="Enter message").pack()
+    messageBox = Text(mainWindow, height=5, width=40)
+    messageBox.pack()
+    button = Button(mainWindow, width=8, height=1, text="Send", command=sendMessage, font=('Comic Sans MS', 14, 'bold'),
+                    relief=RAISED, )
+    button.pack(pady=15)
+    '''varST = StringVar()
+    message = Message(mainWindow,textvariable=varST).pack()
+    varST.set("Hhh")
+    varST.set(str(varST.get())+"hhjfljasajd;aj")'''
+    mainWindow.attributes("-topmost", True)
+    mainWindow.attributes("-topmost", False)
+    mainWindow.mainloop()
+else:
+    socketObj.close()
 
 
