@@ -99,10 +99,6 @@ if connectionDetailsValidationFlag==1:
     button = Button(mainWindow, width=8, height=1, text="Send", command=sendMessage, font=('Comic Sans MS', 14, 'bold'),
                     relief=RAISED, )
     button.pack(pady=15)
-    '''varST = StringVar()
-    message = Message(mainWindow,textvariable=varST).pack()
-    varST.set("Hhh")
-    varST.set(str(varST.get())+"hhjfljasajd;aj")'''
     mainWindow.attributes("-topmost", True)
     mainWindow.attributes("-topmost", False)
     mainWindow.mainloop()
