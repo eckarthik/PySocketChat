@@ -1,5 +1,7 @@
 import socket,threading,random
 from tkinter import *
+socketObj = None
+clientName = None
 def receiveMessages(serverSocket):
     while True:
         message = serverSocket.recv(1024).decode("UTF-8")
@@ -28,25 +30,48 @@ def receiveMessages(serverSocket):
 def sendMessage():
     #print("Inside send message"+message.get())
     message = messageBox.get("1.0","end-1c")
+    global socketObj
     socketObj.send(message.encode("UTF-8"))
     messageBox.delete("1.0",END)
 
-
-while True:
+def printIP():
+    global socketObj
     socketObj = socket.socket()
     port = 10345
-    socketObj.connect(('127.0.0.1', port))
-    window = Tk()
-    clientName = str(input("Choose a name for userself \n"))
-    socketObj.send(clientName.encode("UTF-8"))
-    validations = str(socketObj.recv(1024).decode("UTF-8"))
-    print(validations)
-    if validations=="EverythingIsFine":
-        threading.Thread(target=receiveMessages, args=(socketObj,)).start()
-        break
+    try:
+        socketObj.connect((ipAddrFromGUI.get(), port))
+    except socket.gaierror:
+        print("Invalid Server address or Server is not alive")
     else:
-        print("Username already used \n")
-        socketObj.close()
+        print(ipAddrFromGUI.get(),usernameFromGUI.get())
+        # clientName = str(input("Choose a name for userself \n"))
+        global clientName
+        clientName = usernameFromGUI.get()
+        socketObj.send(clientName.encode("UTF-8"))
+        validations = str(socketObj.recv(1024).decode("UTF-8"))
+        print(validations)
+        if validations == "EverythingIsFine":
+            threading.Thread(target=receiveMessages, args=(socketObj,)).start()
+            window.destroy()
+        else:
+            print("Username already used \n")
+            socketObj.close()
+
+window = Tk()
+window.geometry('300x200')
+window.title("Enter Server Details")
+labelIPAddr = Label(window, text="Enter Server IP").pack()
+ipAddrFromGUI = StringVar()
+entryBoxIPAddr = Entry(window,textvariable=ipAddrFromGUI).pack()
+labelUsername = Label(window, text="Choose a username").pack()
+usernameFromGUI = StringVar()
+entryBoxUsername = Entry(window, textvariable=usernameFromGUI).pack()
+button = Button(window, width=8, height=1, text="Connect", command=printIP, font=('Comic Sans MS', 14, 'bold'),
+                relief=RAISED, )
+button.pack(pady=15)
+window.mainloop()
+
+
 
 
 

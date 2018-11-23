@@ -1,4 +1,4 @@
-import socket,threading,sys
+import socket,threading,random
 
 socketObj = socket.socket()
 
@@ -8,6 +8,8 @@ socketObj.listen(6)
 addresses = []
 clientNames = []
 clientSockets = []
+#password = random.randrange(100000,999999)
+#print("Password = "+str(password))
 def broadCast(message):
     print("Inside broadcast")
     for client in clientSockets:
@@ -23,7 +25,7 @@ def handleClient(socket,clientName):
             broadCast(clientName+":"+message)
         except ConnectionResetError:
             clientSockets.remove(socket)
-            broadCast("---------------------------"+clientName+" left the chat---------------------------")
+            broadCast("-------------------------"+clientName+" left the chat-------------------------")
             print(clientName,"closed connection")
             break
 
