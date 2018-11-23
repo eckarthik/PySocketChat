@@ -9,35 +9,54 @@ connectionDetailsValidationFlag = 0
 
 def receiveMessages(serverSocket):
     while True:
-        message = serverSocket.recv(1024).decode("UTF-8")
-        #identify the : character in the message
-        index = 0
-        for char in message:
-            if char==':':
-                break
-            else:
-                index+=1
-        randNum = random.randrange(1,3)
-        tagName = "name"+str(randNum)
-        textBox.config(state=NORMAL)
-        textBox.insert(END, "\n" + message,tagName)
-        textBox.config(state=DISABLED)
-        lineCount = str(int(textBox.index('end').split('.')[0])-1)
-        #print("Index = ", index, " lineCOunt = ", lineCount,"rand = ",randNum)
-        textBox.tag_add("name1",lineCount+".0",lineCount+"."+str(index))
-        textBox.tag_config("name1", foreground='red')
-        textBox.tag_add("name2", lineCount + ".0", lineCount + "." + str(index))
-        textBox.tag_config("name2", foreground='green')
-        textBox.tag_add("message", lineCount + "." + str(index), lineCount + "." + str(len(message)))
-        textBox.tag_config("message", foreground='black')
+        try:
+            message = serverSocket.recv(1024).decode("UTF-8")
+        except ConnectionResetError as e:
+            textBox.insert(END, "\n" + str(e.strerror))
+            break
+        except ConnectionAbortedError as e:
+            textBox.insert(END, "\n" + str(e.strerror))
+            break
+        except ConnectionError as e:
+            textBox.insert(END, "\n" + str(e.strerror))
+            break
+        else:
+            #identify the : character in the message
+            index = 0
+            for char in message:
+                if char==':':
+                    break
+                else:
+                    index+=1
+            randNum = random.randrange(1,3)
+            tagName = "name"+str(randNum)
+            textBox.config(state=NORMAL)
+            textBox.insert(END, "\n" + message,tagName)
+            textBox.config(state=DISABLED)
+            lineCount = str(int(textBox.index('end').split('.')[0])-1)
+            #print("Index = ", index, " lineCOunt = ", lineCount,"rand = ",randNum)
+            textBox.tag_add("name1",lineCount+".0",lineCount+"."+str(index))
+            textBox.tag_config("name1", foreground='red')
+            textBox.tag_add("name2", lineCount + ".0", lineCount + "." + str(index))
+            textBox.tag_config("name2", foreground='green')
+            textBox.tag_add("message", lineCount + "." + str(index), lineCount + "." + str(len(message)))
+            textBox.tag_config("message", foreground='black')
 
 
 def sendMessage():
     #print("Inside send message"+message.get())
     message = messageBox.get("1.0","end-1c")
     global socketObj
-    socketObj.send(message.encode("UTF-8"))
-    messageBox.delete("1.0",END)
+    try:
+        socketObj.send(message.encode("UTF-8"))
+    except ConnectionResetError as e:
+        textBox.insert(END, "\n\n Unable to send message: " + str(e.strerror))
+    except ConnectionAbortedError as e:
+        textBox.insert(END, "\n\n Unable to send message: " + str(e.strerror))
+    except ConnectionError as e:
+        textBox.insert(END, "\n\n Unable to send message: " + str(e.strerror))
+    else:
+        messageBox.delete("1.0",END)
 
 def printIP():
     global socketObj
