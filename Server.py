@@ -32,10 +32,25 @@ def handleClient(socket,clientName):
             chatLogsTextBox.insert(END, "\n"+clientName+":"+message)
             broadCast(clientName+":"+message)
         except ConnectionResetError:
+            socket.close()
             clientSockets.remove(socket)
             broadCast("-------------------------"+clientName+" left the chat-------------------------")
             #print(clientName,"closed connection")
             chatLogsTextBox.insert(END, "\n"+clientName+" closed connection")
+            break
+        except ConnectionAbortedError as e:
+            socket.close()
+            clientSockets.remove(socket)
+            broadCast("-------------------------" + clientName + " left the chat-------------------------")
+            # print(clientName,"closed connection")
+            chatLogsTextBox.insert(END, "\n" + clientName + " closed connection")
+            break
+        except ConnectionError as e:
+            socket.close()
+            clientSockets.remove(socket)
+            broadCast("-------------------------" + clientName + " left the chat-------------------------")
+            # print(clientName,"closed connection")
+            chatLogsTextBox.insert(END, "\n" + clientName + " closed connection")
             break
 
 
@@ -73,6 +88,7 @@ def main():
             #message = "Welcome "+str(clientName)+" "
             #print(message)
             chatLogsTextBox.insert(END, "\n "+clientName+" joined the chat")
+            broadCast("-----------------------" + clientName + " joined the chat-----------------------")
             '''c.send(message.encode("UTF-8"))
             print(c.recv(1024).decode('utf-8'))'''
             threading.Thread(target=handleClient,args=(c,clientName,)).start()

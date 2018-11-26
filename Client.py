@@ -12,13 +12,19 @@ def receiveMessages(serverSocket):
         try:
             message = serverSocket.recv(1024).decode("UTF-8")
         except ConnectionResetError as e:
+            textBox.config(state=NORMAL)
             textBox.insert(END, "\n" + str(e.strerror))
+            textBox.config(state=DISABLED)
             break
         except ConnectionAbortedError as e:
+            textBox.config(state=NORMAL)
             textBox.insert(END, "\n" + str(e.strerror))
+            textBox.config(state=DISABLED)
             break
         except ConnectionError as e:
+            textBox.config(state=NORMAL)
             textBox.insert(END, "\n" + str(e.strerror))
+            textBox.config(state=DISABLED)
             break
         else:
             #identify the : character in the message
@@ -50,11 +56,17 @@ def sendMessage():
     try:
         socketObj.send(message.encode("UTF-8"))
     except ConnectionResetError as e:
-        textBox.insert(END, "\n\n Unable to send message: " + str(e.strerror))
+        textBox.config(state=NORMAL)
+        textBox.insert(END, "\n Unable to send message: " + str(e.strerror))
+        textBox.config(state=DISABLED)
     except ConnectionAbortedError as e:
-        textBox.insert(END, "\n\n Unable to send message: " + str(e.strerror))
+        textBox.config(state=NORMAL)
+        textBox.insert(END, "\n Unable to send message: " + str(e.strerror))
+        textBox.config(state=DISABLED)
     except ConnectionError as e:
-        textBox.insert(END, "\n\n Unable to send message: " + str(e.strerror))
+        textBox.config(state=NORMAL)
+        textBox.insert(END, "\n Unable to send message: " + str(e.strerror))
+        textBox.config(state=DISABLED)
     else:
         messageBox.delete("1.0",END)
 
@@ -122,6 +134,7 @@ if connectionDetailsValidationFlag==1:
     mainWindow.attributes("-topmost", True)
     mainWindow.attributes("-topmost", False)
     mainWindow.mainloop()
+    socketObj.close()
 else:
     socketObj.close()
 
