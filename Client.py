@@ -55,6 +55,7 @@ def sendMessage():
     global socketObj
     try:
         socketObj.send(message.encode("UTF-8"))
+        print("Message sent = ",message.encode("UTF-8"))
     except ConnectionResetError as e:
         textBox.config(state=NORMAL)
         textBox.insert(END, "\n Unable to send message: " + str(e.strerror))

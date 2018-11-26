@@ -15,14 +15,31 @@ window = Tk()
 window.title("Monitor Chats")
 chatLogsTextBox = Text(window, height=20, width=50, fg='blue', font=('Comic Sans MS', 12))
 chatLogsTextBox.pack()
-def broadCast(message):
+def broadCast(message,isPrivate=False):
     #print("Inside broadcast")
     #chatLogsTextBox.insert(END,"\n Inside broadcast")
-    for client in clientSockets:
-        client.send(message.encode("UTF-8"))
+    if isPrivate:
+        user = message.split(":")[0]
+        action = message.split(":")[1].split(" ")[0]
+        messageToBeSent = message.split(":")[1].split(" ", 1)[1]
+        print("user = ", user)
+        print("action = ", action)
+        print("message = ", messageToBeSent)
+        privateClientName = message.split(":")[1].split(" ")[1]
+        print("privateClientName = ",privateClientName)
+        if action=="@private":
+            for client in clientSockets:
+                if client['clientName']==privateClientName.lower():
+                    client['socket'].send(str("Private message from "+user+":"+messageToBeSent).encode("UTF-8"))
+                    for client2 in clientSockets:
+                        if client2['clientName'] == user:
+                            client2['socket'].send(str("Private message sent to " + privateClientName).encode("UTF-8"))
+    else:
+        for client in clientSockets:
+            client['socket'].send(message.encode("UTF-8"))
 
 def handleClient(socket,clientName):
-    clientSockets.append(socket)
+    clientSockets.append({'socket':socket,'clientName':clientName})
     #print("Inside handleClient Thread")
     #chatLogsTextBox.insert(END, "\n Inside handleClient Thread")
     while True:
@@ -30,24 +47,27 @@ def handleClient(socket,clientName):
             message = socket.recv(1024).decode('utf-8')
             #print("Server got "+message)
             chatLogsTextBox.insert(END, "\n"+clientName+":"+message)
-            broadCast(clientName+":"+message)
+            if message.startswith("@private"):
+                broadCast(clientName + ":" + message,True)
+            else:
+                broadCast(clientName+":"+message,False)
         except ConnectionResetError:
             socket.close()
-            clientSockets.remove(socket)
+            clientSockets.remove({'socket':socket,'clientName':clientName})
             broadCast("-------------------------"+clientName+" left the chat-------------------------")
             #print(clientName,"closed connection")
             chatLogsTextBox.insert(END, "\n"+clientName+" closed connection")
             break
         except ConnectionAbortedError as e:
             socket.close()
-            clientSockets.remove(socket)
+            clientSockets.remove({'socket':socket,'clientName':clientName})
             broadCast("-------------------------" + clientName + " left the chat-------------------------")
             # print(clientName,"closed connection")
             chatLogsTextBox.insert(END, "\n" + clientName + " closed connection")
             break
         except ConnectionError as e:
             socket.close()
-            clientSockets.remove(socket)
+            clientSockets.remove({'socket':socket,'clientName':clientName})
             broadCast("-------------------------" + clientName + " left the chat-------------------------")
             # print(clientName,"closed connection")
             chatLogsTextBox.insert(END, "\n" + clientName + " closed connection")
@@ -61,7 +81,7 @@ def main():
         chatLogsTextBox.insert(END, "\n connected to:"+addr[0]+":"+str(addr[1]))
         addresses.append(addr)
         data = str(c.recv(1024).decode("UTF-8")).split(":")
-        clientName = str(data[0])
+        clientName = str(data[0]).lower()
         password = str(data[1])
         clientNames.append(str(clientName).lower())
         #print("Clients Present",clientNames)
